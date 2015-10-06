@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace YouTubeParse
 {
-    class YouTubeCommentsPage
+    public class YouTubeCommentsPage
     {
         private string _page;
         public YouTubeURL VideoUrl { get; set; }
@@ -30,14 +30,14 @@ namespace YouTubeParse
         }
         public void DownloadYouTubeCommentsPage()
         {
-            var downloader = new HttpDownloader(VideoUrl.LongYTURL.AbsoluteUri, String.Empty, String.Empty);
+            var downloader = new HttpDownloader(VideoUrl.AllCommentsUri.AbsoluteUri, String.Empty, String.Empty);
             _page = downloader.GetPage();
         }
 
         public void GetNumComments()
         {
             var numCommentsMatch = Regex.Match(_page, @"\<strong\>All\sComments\<\/strong\>\s\((?<comments>[^\)]*)");
-            _numComments = int.Parse(numCommentsMatch.Groups["comments"].Value, NumberStyles.AllowThousands);
+            _numComments = numCommentsMatch.Groups["comments"].Success ? int.Parse(numCommentsMatch.Groups["comments"].Value, NumberStyles.AllowThousands) : 0;
         }
     }
 }

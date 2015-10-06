@@ -50,6 +50,7 @@ namespace YouTubeParse
         /// All of the videos in this playlist
         /// </summary>
         public List<YouTubeURL> VideoUrlsList { get { return _pageUrls; } }
+
         /// <summary>
         /// Instantiates a new YouTubePlaylist object, containing information about a playlist on YouTube.
         /// </summary>
@@ -65,6 +66,33 @@ namespace YouTubeParse
             GetPlaylistInformation();
             GetAllYouTubeUrls();
             GetTotalDuration();
+        }
+
+        /// <summary>
+        /// Checks if a string has YouTube playlist information
+        /// </summary>
+        /// <param name="url">String to validate as continaing a YouTube playlist</param>
+        /// <returns>Whether the input string is a URL with a valid YouTube playlist</returns>
+        public static bool ValidatePlaylistUrl(string url)
+        {
+            if ((url.Contains("youtube.com") || url.Contains("youtu.be")) && url.Contains("list="))
+                return true;
+            return false;
+        }
+
+        public YouTubeVideoGroup GetYouTubeVideoGroup()
+        {
+            List<YouTubeVideo> videosList = new List<YouTubeVideo>();
+            foreach (var video in VideoUrlsList)
+            {
+                YouTubePage ytPage = new YouTubePage(video);
+                ytPage.DownloadYouTubePage();
+                YouTubeCommentsPage ytComPage = new YouTubeCommentsPage(video);
+                ytComPage.DownloadYouTubeCommentsPage();
+                YouTubeVideo ytv = new YouTubeVideo(video, ytPage, ytComPage);
+                videosList.Add(ytv);
+            }
+            return new YouTubeVideoGroup(videosList);
         }
 
         private void GetTotalDuration()
@@ -83,18 +111,6 @@ namespace YouTubeParse
                     matchDuration = match.Groups["TS"].Value;   // String is already in hh:mm:ss format
                 Duration += TimeSpan.Parse(matchDuration);
             }
-        }
-
-        /// <summary>
-        /// Checks if a string has YouTube playlist information
-        /// </summary>
-        /// <param name="url">String to validate as continaing a YouTube playlist</param>
-        /// <returns>Whether the input string is a URL with a valid YouTube playlist</returns>
-        public static bool ValidatePlaylistUrl(string url)
-        {
-            if ((url.Contains("youtube.com") || url.Contains("youtu.be")) && url.Contains("list="))
-                return true;
-            return false;
         }
         private string GetPlaylistId(string playlistUrl)
         {

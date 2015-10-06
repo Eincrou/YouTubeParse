@@ -51,6 +51,8 @@
     <Compile Include="YouTubePlaylist.cs" />
     <Compile Include="YouTubeURL.cs" />
     <Compile Include="YouTubeURLAlternate.cs" />
+    <Compile Include="YouTubeVideo.cs" />
+    <Compile Include="YouTubeVideoGroup.cs" />
     <Compile Include="YouTubeVideoThumbnail.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
