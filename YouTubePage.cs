@@ -200,16 +200,17 @@ namespace YouTubeParse
         /// <summary>
         /// The video's genre
         /// </summary>
-        public string Genre
+        public YouTubeGenre Genre
         {
             get
             {
-                if (_genre == null)
+                if (!_genre.HasValue)
                     GetGenre();
-                return _genre;
+                if (_genre != null) return _genre.Value;
+                throw new Exception("Could not determine YouTubeGenre");
             }
         }
-        private string _genre;
+        private YouTubeGenre? _genre;
         /// <summary>
         /// An array of strings containing all of the video's tags
         /// </summary>
@@ -359,7 +360,8 @@ namespace YouTubeParse
         private void GetGenre()
         {
             var genreMatch = Regex.Match(_page, @"<meta\sitemprop=""genre""\scontent=""(?<genre>[^""]*)"">");
-            _genre = WebUtility.HtmlDecode(genreMatch.Groups["genre"].Value);
+            string genreStr = WebUtility.HtmlDecode(genreMatch.Groups["genre"].Value);
+            _genre = YouTubeGenreHelper.StringToEnum(genreStr);
         }
         private void GetTags()
         {

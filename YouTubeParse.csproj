@@ -46,7 +46,7 @@
     <Compile Include="YouTubeChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="YouTubeCommentsPage.cs" />
-    <Compile Include="YouTubeGenres.cs" />
+    <Compile Include="YouTubeGenre.cs" />
     <Compile Include="YouTubePage.cs" />
     <Compile Include="YouTubePlaylist.cs" />
     <Compile Include="YouTubeURL.cs" />
