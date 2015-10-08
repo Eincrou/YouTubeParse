@@ -10,11 +10,12 @@ using System.Threading.Tasks;
 
 namespace YouTubeParse
 {
-    public class YouTubePlaylist
+    public class YouTubePlaylistPage
     {
         private readonly string _playlistId;
-        private readonly string _playlistPage;
+        private string _playlistPage;
         private readonly List<YouTubeURL> _pageUrls = new List<YouTubeURL>();
+        public bool IsPageDownloaded { get; private set; }
         /// <summary>
         /// URL to this playlist's main page
         /// </summary>
@@ -55,17 +56,22 @@ namespace YouTubeParse
         /// Instantiates a new YouTubePlaylist object, containing information about a playlist on YouTube.
         /// </summary>
         /// <param name="playlistUrl">String representing a valid YouTube playlist URL</param>
-        public YouTubePlaylist(string playlistUrl)
+        public YouTubePlaylistPage(string playlistUrl)
         {
             if (!ValidatePlaylistUrl(playlistUrl))
                 throw new ArgumentException("Invalid YouTube playlist URL", "playlistUrl");
             _playlistId = GetPlaylistId(playlistUrl);
+        }
+
+        public async Task DownloadPlaylistPageAsync()
+        {
             var downloader = new HttpDownloader(PlaylistUrl, String.Empty, String.Empty);
-            _playlistPage = downloader.GetPage();
+            _playlistPage = await downloader.GetPageAsync();
 
             GetPlaylistInformation();
             GetAllYouTubeUrls();
             GetTotalDuration();
+            IsPageDownloaded = true;
         }
 
         /// <summary>
@@ -80,15 +86,17 @@ namespace YouTubeParse
             return false;
         }
 
-        public YouTubeVideoGroup GetYouTubeVideoGroup()
+        public async Task<YouTubeVideoGroup> GetYouTubeVideoGroupAsync()
         {
             List<YouTubeVideo> videosList = new List<YouTubeVideo>();
             foreach (var video in VideoUrlsList)
             {
                 YouTubePage ytPage = new YouTubePage(video);
-                ytPage.DownloadYouTubePage();
                 YouTubeCommentsPage ytComPage = new YouTubeCommentsPage(video);
-                ytComPage.DownloadYouTubeCommentsPage();
+                Task[] tasks = new Task[2];
+                tasks[0] = ytPage.DownloadYouTubePageAsync();
+                tasks[1] = ytComPage.DownloadYouTubeCommentsPageAsync();
+                await Task.WhenAll(tasks);
                 YouTubeVideo ytv = new YouTubeVideo(video, ytPage, ytComPage);
                 videosList.Add(ytv);
             }

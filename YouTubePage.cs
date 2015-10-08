@@ -16,6 +16,8 @@ namespace YouTubeParse
         private string _page;
 
         #region Public Properties
+
+        public bool IsPageDownloaded { get; private set; }
         /// <summary>
         /// Contains fields with various YouTube URLs
         /// </summary>
@@ -237,10 +239,11 @@ namespace YouTubeParse
         /// <summary>
         /// Downloads the HTML of a YouTube video. This is required before accessing any information.
         /// </summary>
-        public void DownloadYouTubePage()
+        public async Task DownloadYouTubePageAsync()
         {
-                var downloader = new HttpDownloader(VideoUrl.LongYTURL.AbsoluteUri, String.Empty, String.Empty);
-                _page = downloader.GetPage();
+            var downloader = new HttpDownloader(VideoUrl.LongYTURL.AbsoluteUri, String.Empty, String.Empty);
+            _page = await downloader.GetPageAsync();
+            IsPageDownloaded = true;
         }
         /// <summary>
         /// Populates all fields with information. (Ordinarily, information is only parsed when accessed.)

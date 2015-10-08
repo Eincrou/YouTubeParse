@@ -13,17 +13,34 @@ namespace YouTubeParse
         public YouTubeCommentsPage CommentsPage { get; set; }
         //public YouTubeVideoThumbnail Thumbnail { get; set; }
 
-        public YouTubeVideo(YouTubeURL yturl, YouTubePage ytp, YouTubeCommentsPage ytcp)
+        //public YouTubeVideo(YouTubeURL ytUrl)
+        //{
+        //    Url = ytUrl;
+        //    Page = new YouTubePage(ytUrl);
+        //    CommentsPage = new YouTubeCommentsPage(ytUrl);
+        //    DownloadPages();
+        //}
+        public YouTubeVideo(YouTubeURL ytUrl, YouTubePage ytPage, YouTubeCommentsPage ytComPage)
         {
-            Url = yturl;
-            Page = ytp;
-            CommentsPage = ytcp;
+            Url = ytUrl;
+            Page = ytPage;
+            CommentsPage = ytComPage;
         }
-        public YouTubeVideo(YouTubePage ytp, YouTubeCommentsPage ytcp)
+        public YouTubeVideo(YouTubePage ytPage, YouTubeCommentsPage ytComPage)
         {
-            Url = ytp.VideoUrl;
-            Page = ytp;
-            CommentsPage = ytcp;
+            Url = ytPage.VideoUrl;
+            Page = ytPage;
+            CommentsPage = ytComPage;
         }
+
+        //private async void DownloadPages()
+        //{
+            
+        //    var pagesToDownload = 
+        //    var tasks = new Task[2];
+        //    tasks[0] = Page.DownloadYouTubePageAsync();
+        //    tasks[1] = CommentsPage.DownloadYouTubeCommentsPageAsync();
+        //    await Task.WhenAll(tasks);
+        //}
     }
 }

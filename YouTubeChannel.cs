@@ -10,7 +10,7 @@ namespace YouTubeParse
     public class YouTubeChannel
     {
         private string _channelMainPage;
-        private string _channelAboutPage;
+        //private string _channelAboutPage;
 
         public string ChannelId { get; private set; }
         public string Title { get; private set; }
@@ -21,13 +21,19 @@ namespace YouTubeParse
 
         public YouTubeChannel(string channelUrl )
         {
+            
             if (!ValidateChannelUrl(channelUrl))
                 throw new ArgumentException("Invalid YouTube channel URL", "channelUrl");
             Uri = new Uri(channelUrl, UriKind.Absolute);
             GetChannelId(channelUrl);
 
-            var downloader = new HttpDownloader(channelUrl, String.Empty, String.Empty);
-            _channelMainPage = downloader.GetPage();
+            throw new NotImplementedException("This class is not ready for prime-time");
+        }
+
+        public async Task DownloadCommentsPage()
+        {
+            var downloader = new HttpDownloader(Uri.AbsoluteUri, String.Empty, String.Empty);
+            _channelMainPage = await downloader.GetPageAsync();
         }
 
         private void GetChannelId(string channelUrl)

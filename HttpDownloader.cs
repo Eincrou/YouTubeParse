@@ -31,7 +31,7 @@ namespace YouTubeParse
             _referer = referer;
         }
 
-        public string GetPage()
+        public async Task<string> GetPageAsync()
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url);
             if (!string.IsNullOrEmpty(_referer))
@@ -40,17 +40,17 @@ namespace YouTubeParse
                 request.UserAgent = _userAgent;
 
             request.Headers.Add(HttpRequestHeader.AcceptEncoding, "gzip,deflate");
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (HttpWebResponse response = (HttpWebResponse) await request.GetResponseAsync())
             {
                 Headers = response.Headers;
                 Url = response.ResponseUri;
                 return ProcessContent(response);
             }
         }
-        public Task<string> GetPageAsync()
-        {
-            return new Task<string>(GetPage);
-        }
+        //public Task<string> GetPageAsync()
+        //{
+        //    return new Task<string>(GetPage);
+        //}
 
         private string ProcessContent(HttpWebResponse response)
         {

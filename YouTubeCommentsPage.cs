@@ -19,7 +19,8 @@ namespace YouTubeParse
             {
                 if (!_numComments.HasValue)
                     GetNumComments();
-                return _numComments.Value;
+                if (_numComments != null) return _numComments.Value;
+                throw new Exception("Number of comments could not be determined.");
             }
         }
         private int? _numComments;
@@ -28,10 +29,10 @@ namespace YouTubeParse
         {
             VideoUrl = yturl;
         }
-        public void DownloadYouTubeCommentsPage()
+        public async Task DownloadYouTubeCommentsPageAsync()
         {
             var downloader = new HttpDownloader(VideoUrl.AllCommentsUri.AbsoluteUri, String.Empty, String.Empty);
-            _page = downloader.GetPage();
+            _page = await downloader.GetPageAsync();
         }
 
         public void GetNumComments()
