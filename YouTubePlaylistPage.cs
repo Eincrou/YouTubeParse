@@ -61,9 +61,9 @@ namespace YouTubeParse
             _playlistId = GetPlaylistId(playlistUrl);
         }
 
-        public async Task DownloadPlaylistPageAsync()
+        public override async Task DownloadPageAsync()
         {
-            await DownloadPageAsync();
+            await base.DownloadPageAsync();
             GetPlaylistInformation();
             GetAllYouTubeUrls();
             GetTotalDuration();
@@ -89,17 +89,22 @@ namespace YouTubeParse
                 YouTubeVideoPage ytVideoPage = new YouTubeVideoPage(video);
                 YouTubeCommentsPage ytComPage = new YouTubeCommentsPage(video);
                 Task[] tasks = new Task[2];
-                tasks[0] = ytVideoPage.DownloadYouTubePageAsync();
-                tasks[1] = ytComPage.DownloadYouTubeCommentsPageAsync();
+                tasks[0] = ytVideoPage.DownloadPageAsync();
+                tasks[1] = ytComPage.DownloadPageAsync();
                 await Task.WhenAll(tasks);
                 YouTubeVideo ytv = new YouTubeVideo(video, ytVideoPage, ytComPage);
                 videosList.Add(ytv);
             }
             return new YouTubeVideoGroup(videosList);
         }
-
-        private void GetTotalDuration()
+        private string GetPlaylistId(string playlistUrl)
         {
+            var plIdMatch = Regex.Match(playlistUrl, @"list=(?<list>[^&]*)");
+            return plIdMatch.Groups["list"].Value;
+        }
+        private async void GetTotalDuration()
+        {
+            if (!IsPageDownloaded) await DownloadPageAsync();
             Duration = TimeSpan.Zero;
             var tsMatches = Regex.Matches(Page,
                 @"<div\sclass=""timestamp"">[^>]*>(?<TS>[^<]*)");
@@ -115,13 +120,9 @@ namespace YouTubeParse
                 Duration += TimeSpan.Parse(matchDuration);
             }
         }
-        private string GetPlaylistId(string playlistUrl)
+        private async void GetPlaylistInformation()
         {
-            var plIdMatch = Regex.Match(playlistUrl, @"list=(?<list>[^&]*)");
-            return plIdMatch.Groups["list"].Value;
-        } 
-        private void GetPlaylistInformation()
-        {
+            if (!IsPageDownloaded) await DownloadPageAsync();
             GetTitle();
             var detailsMatch = Regex.Match(Page,
                 @"<ul\sclass=""pl-header-details""><li>by\s<a\shref=[^>]*>(?<owner>[^<]*)</a></li><li>(?<numvideos>\S*)[^<]*<\/li><li>(?<views>\S*)[^<]*<\/li><li>(Last\supdated\son\s(?<updated>[^<]*)|Updated\s(?<updated>[^<]*))");
@@ -137,15 +138,16 @@ namespace YouTubeParse
                 dateUpdatedValue = DateTime.Today;
             LastUpdated = dateUpdatedValue;
         }
-        private void GetTitle()
+        private async void GetTitle()
         {
+            if (!IsPageDownloaded) await DownloadPageAsync();
             var titleMatch = Regex.Match(Page, @"<h1\sclass=""pl-header-title"">\s*(?<title>[^\r\n]*)");
             string title = titleMatch.Groups["title"].Value;
             Title = WebUtility.HtmlDecode(title);
         }
-
-        private void GetAllYouTubeUrls()
+        private async void GetAllYouTubeUrls()
         {
+            if (!IsPageDownloaded) await DownloadPageAsync();
             var urlMatches = Regex.Matches(Page,
                 @"<td\sclass=""pl-video-title"">\s*<a\s([\w-]*=""[^""]*""\s?)*");
             // TODO This hardcoding should be improved.
@@ -156,6 +158,5 @@ namespace YouTubeParse
                 VideoUrlsList.Add(new YouTubeUrl(@"https://www.youtube.com/watch?v=" + vidId));
             }
         }
-
     }
 }

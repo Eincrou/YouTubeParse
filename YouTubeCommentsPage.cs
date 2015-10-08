@@ -24,17 +24,33 @@ namespace YouTubeParse
         }
         private int? _numComments;
 
-        public YouTubeCommentsPage(YouTubeUrl ytUrl) : base (ytUrl)
+        public YouTubeCommentsPage(YouTubeUrl ytUrl) : base (ytUrl.AllCommentsUri.AbsoluteUri)
         {
             VideoUrl = ytUrl;
         }
-        public async Task DownloadYouTubeCommentsPageAsync()
+
+        public YouTubeCommentsPage(string url) : base (url)
         {
-            await DownloadPageAsync();
+            if(!ValidateYouTubeCommentsPageUrl(url))
+                throw new ArgumentException("Invalid YouTube comments page Url", nameof(url));
+        }
+        /// <summary>
+        /// Downloads the HTML of a YouTube comments page. This is required before accessing any information.
+        /// </summary>
+        public override async Task DownloadPageAsync()
+        {
+            await base.DownloadPageAsync();
         }
 
-        public void GetNumComments()
+        public static bool ValidateYouTubeCommentsPageUrl(string url)
+        {       // https://www.youtube.com/all_comments?v=xxxxxxxxxxx
+            if ((url.Contains(@"youtube.com") && url.Contains(@"all_comments")) && url.Contains(@"v="))
+                return true;
+            return false;
+        }
+        private async void GetNumComments()
         {
+            if (!IsPageDownloaded) await DownloadPageAsync();
             var numCommentsMatch = Regex.Match(Page, @"\<strong\>All\sComments\<\/strong\>\s\((?<comments>[^\)]*)");
             _numComments = numCommentsMatch.Groups["comments"].Success ? int.Parse(numCommentsMatch.Groups["comments"].Value, NumberStyles.AllowThousands) : 0;
         }

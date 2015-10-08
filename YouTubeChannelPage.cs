@@ -36,7 +36,8 @@ namespace YouTubeParse
         }
         public static bool ValidateChannelUrl(string url)
         {
-            if ((url.Contains("youtube.com") || url.Contains("youtu.be")) && (url.Contains("/user/") || url.Contains("/channel/")))
+            if (url.Contains(@"youtube.com") && 
+                (url.Contains(@"/user/") || url.Contains(@"/channel/")))
                 return true;
             return false;
         }
