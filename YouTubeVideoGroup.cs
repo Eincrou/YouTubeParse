@@ -13,7 +13,7 @@ namespace YouTubeParse
         public int Count { get { return VideoGroupList.Count(); } }
         public List<string> TitlesList
         {
-            get { return VideoGroupList.Select(video => video.Page.VideoTitle).ToList(); }
+            get { return VideoGroupList.Select(video => video.VideoPage.VideoTitle).ToList(); }
         }
         public List<Uri> UrisList
         {
@@ -23,11 +23,11 @@ namespace YouTubeParse
 
         public int ViewsTotal
         {
-            get { return VideoGroupList.Sum(video => video.Page.ViewCount); }
+            get { return VideoGroupList.Sum(video => video.VideoPage.ViewCount); }
         }
         public double ViewsAvg
         {
-            get { return VideoGroupList.Average(video => video.Page.ViewCount); }
+            get { return VideoGroupList.Average(video => video.VideoPage.ViewCount); }
         }
         public int CommentsTotal
         {
@@ -40,13 +40,13 @@ namespace YouTubeParse
         public TimeSpan DurationTotal
         {
             get { return new TimeSpan(0, 0, 0, 
-                (int) VideoGroupList.Sum(video => video.Page.Duration.TotalSeconds)); }
+                (int) VideoGroupList.Sum(video => video.VideoPage.Duration.TotalSeconds)); }
         }
         public TimeSpan DurationAvg
         {
             get {
                 return new TimeSpan(0, 0, 0,
-                    (int) VideoGroupList.Average(video => video.Page.Duration.TotalSeconds)); }
+                    (int) VideoGroupList.Average(video => video.VideoPage.Duration.TotalSeconds)); }
         }
 
         public YouTubeVideoGroup(IEnumerable<YouTubeVideo> videosList)

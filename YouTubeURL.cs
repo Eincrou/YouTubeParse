@@ -6,7 +6,7 @@ namespace YouTubeParse
     /// <summary>
     /// Parses and stores YouTube URLs and VideoIDs.
     /// </summary>
-    public class YouTubeURL : IFormattable, IEquatable<YouTubeURL>
+    public class YouTubeUrl : IFormattable, IEquatable<YouTubeUrl>
     {
         private static readonly string[] _idPatterns =
             { 
@@ -47,7 +47,7 @@ namespace YouTubeParse
         /// Initializes an instance of the YouTubeURL class.
         /// </summary>
         /// <param name="inputUrl">A valid URL for a YouTube video.</param>
-        public YouTubeURL(string inputUrl)
+        public YouTubeUrl(string inputUrl)
         {
             _inputUrl = inputUrl;
             _videoId = GetVideoID(inputUrl);
@@ -86,7 +86,7 @@ namespace YouTubeParse
         }
 
         #region Interface/Override
-        public bool Equals(YouTubeURL other)
+        public bool Equals(YouTubeUrl other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -96,7 +96,7 @@ namespace YouTubeParse
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((YouTubeURL)obj);
+            return Equals((YouTubeUrl)obj);
         }
         public override int GetHashCode() {
             return (_videoId != null ? _videoId.GetHashCode() : 0);

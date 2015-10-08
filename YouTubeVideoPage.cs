@@ -1,27 +1,18 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace YouTubeParse
 {
-    public enum YouTubeVideoPrivacy
+    public class YouTubeVideoPage : YouTubeHtmlPage
     {
-        Public, Unlisted, Private
-    }
-    public class YouTubePage
-    {
-        private string _page;
-
         #region Public Properties
-
-        public bool IsPageDownloaded { get; private set; }
         /// <summary>
         /// Contains fields with various YouTube URLs
         /// </summary>
-        public YouTubeURL VideoUrl { get; private set; }
+        public YouTubeUrl VideoUrl { get; private set; }
         /// <summary>
         /// The title of this YouTube video
         /// </summary>
@@ -232,9 +223,9 @@ namespace YouTubeParse
         /// Instantiates a new YouTubePage instance that can parse information about YouTube videos from their HTML pages
         /// </summary>
         /// <param name="yturl"></param>
-        public YouTubePage(YouTubeURL yturl)
+        public YouTubeVideoPage(YouTubeUrl ytUrl) : base (ytUrl)
         {
-            VideoUrl = yturl;
+            VideoUrl = ytUrl;
         }
         /// <summary>
         /// Downloads the HTML of a YouTube video. This is required before accessing any information.
@@ -242,7 +233,7 @@ namespace YouTubeParse
         public async Task DownloadYouTubePageAsync()
         {
             var downloader = new HttpDownloader(VideoUrl.LongYTURL.AbsoluteUri, String.Empty, String.Empty);
-            _page = await downloader.GetPageAsync();
+            Page = await downloader.GetPageAsync();
             IsPageDownloaded = true;
         }
         /// <summary>
@@ -257,20 +248,20 @@ namespace YouTubeParse
         }
         private void GetVideoTitle()
         {
-            var titleMatch = Regex.Match(_page, @"<meta\sitemprop=""name""\scontent=""(?<name>[^""]*)"">");
+            var titleMatch = Regex.Match(Page, @"<meta\sitemprop=""name""\scontent=""(?<name>[^""]*)"">");
             string title = titleMatch.Groups["name"].Value;
             _videoTitle = WebUtility.HtmlDecode(title);
         }
 
         private void GetChannelInfo()
         {
-            var channelMatch = Regex.Match(_page, @"<div\sclass=""yt-user-info"">[^<]*<.*href=""(?<chanUrl>[^""]*)"".*>(?<chanName>.*)</a>");
+            var channelMatch = Regex.Match(Page, @"<div\sclass=""yt-user-info"">[^<]*<.*href=""(?<chanUrl>[^""]*)"".*>(?<chanName>.*)</a>");
             _channelUrl = new Uri(@"http://www.youtube.com" + channelMatch.Groups["chanUrl"].Value, UriKind.Absolute);
             _channelName = WebUtility.HtmlDecode(channelMatch.Groups["chanName"].Value);
         }
         private void GetChannelIcon()
         {
-            var chanImageMatch = Regex.Match(_page, @"(?im)^\s+<img.*data-thumb=""(?<imageUrl>[^""]*)""");
+            var chanImageMatch = Regex.Match(Page, @"(?im)^\s+<img.*data-thumb=""(?<imageUrl>[^""]*)""");
             var iconUrl = chanImageMatch.Groups["imageUrl"].Value.StartsWith(@"//")
                 ? "http:" + chanImageMatch.Groups["imageUrl"].Value
                 : chanImageMatch.Groups["imageUrl"].Value;
@@ -293,18 +284,18 @@ namespace YouTubeParse
         }
         private void GetPaid()
         {
-            var paidMatch = Regex.Match(_page, @"<meta\sitemprop=""paid""\scontent=""(?<paid>\w*)"">");
+            var paidMatch = Regex.Match(Page, @"<meta\sitemprop=""paid""\scontent=""(?<paid>\w*)"">");
             _paid = bool.Parse(paidMatch.Groups["paid"].Value);
         }
         private void GetDescription()
         {
-            var descMatch = Regex.Match(_page, @"<meta\sitemprop=""description""\scontent=""(?<desc>[^""]*)"">");
+            var descMatch = Regex.Match(Page, @"<meta\sitemprop=""description""\scontent=""(?<desc>[^""]*)"">");
             string description = descMatch.Groups["desc"].Value;
             _videoDescription = WebUtility.HtmlDecode(description);
         }
         private void GetDuration()
         {
-            var durationMatch = Regex.Match(_page, @"<meta\sitemprop=""duration""\scontent=""(?<duration>\w*)"">");
+            var durationMatch = Regex.Match(Page, @"<meta\sitemprop=""duration""\scontent=""(?<duration>\w*)"">");
             var minutesSecondsMatch = Regex.Match(durationMatch.Groups["duration"].Value, @"PT(?<M>\d*)M(?<S>\d*)S");
             int totalMinutes = int.Parse(minutesSecondsMatch.Groups["M"].Value);
             int totalSeconds = int.Parse(minutesSecondsMatch.Groups["S"].Value);
@@ -312,7 +303,7 @@ namespace YouTubeParse
         }
         private void GetPrivacy()
         {
-            var privacyMatch = Regex.Match(_page, @"<meta\sitemprop=""unlisted""\scontent=""(?<unlisted>\w*)"">");
+            var privacyMatch = Regex.Match(Page, @"<meta\sitemprop=""unlisted""\scontent=""(?<unlisted>\w*)"">");
             if (privacyMatch.Groups["unlisted"].Success)
             {
                 _videoPrivacy = privacyMatch.Groups["unlisted"].Value == "True"
@@ -325,22 +316,22 @@ namespace YouTubeParse
 
         private void GetThumbnailUri()
         {
-            var thumbnailUrlMatch = Regex.Match(_page, @"<link\sitemprop=""thumbnailUrl""\shref=""(?<thumburl>[^""]*)"">");
+            var thumbnailUrlMatch = Regex.Match(Page, @"<link\sitemprop=""thumbnailUrl""\shref=""(?<thumburl>[^""]*)"">");
             _thumbnailUri = new Uri(thumbnailUrlMatch.Groups["thumburl"].Value, UriKind.Absolute);
         }
         private void GetIsFamilyFriendly()
         {
-            var famFriendMatch = Regex.Match(_page, @"<meta\sitemprop=""isFamilyFriendly""\scontent=""(?<famFriend>\w*)"">");
+            var famFriendMatch = Regex.Match(Page, @"<meta\sitemprop=""isFamilyFriendly""\scontent=""(?<famFriend>\w*)"">");
             _isFamilyFriendly = bool.Parse(famFriendMatch.Groups["famFriend"].Value);
         }
         private void GetRegionsAllowed()
         {
-            var regionsMatch = Regex.Match(_page, @"<meta\sitemprop=""regionsAllowed""\scontent=""(?<regions>[^""]*)"">");
+            var regionsMatch = Regex.Match(Page, @"<meta\sitemprop=""regionsAllowed""\scontent=""(?<regions>[^""]*)"">");
             _regionsAllowed = regionsMatch.Groups["regions"].Value.Split(',');
         }
         private void GetViewCount()
         {
-            var viewCountMatch = Regex.Match(_page, @"<meta\sitemprop=""interactionCount""\scontent=""(?<views>\d*)"">");
+            var viewCountMatch = Regex.Match(Page, @"<meta\sitemprop=""interactionCount""\scontent=""(?<views>\d*)"">");
             //string views;
             //if (viewCountMatch.Groups["views"].Value != String.Empty)
             //{
@@ -355,20 +346,20 @@ namespace YouTubeParse
         }
         private void GetPublished()
         {
-            //var pubMatch = Regex.Match(_page, @"(?:Published|Uploaded|Started|Streamed live)\son\s(?<date>[^<]*)");
+            //var pubMatch = Regex.Match(Page, @"(?:Published|Uploaded|Started|Streamed live)\son\s(?<date>[^<]*)");
             //_published = pubMatch.Groups["date"].Success ? DateTime.Parse(pubMatch.Groups["date"].Value) : new DateTime();
-            var publishMatch = Regex.Match(_page, @"<meta\sitemprop=""datePublished""\scontent=""(?<published>[^""]*)"">");
+            var publishMatch = Regex.Match(Page, @"<meta\sitemprop=""datePublished""\scontent=""(?<published>[^""]*)"">");
             _published = DateTime.Parse(publishMatch.Groups["published"].Value);
         }
         private void GetGenre()
         {
-            var genreMatch = Regex.Match(_page, @"<meta\sitemprop=""genre""\scontent=""(?<genre>[^""]*)"">");
+            var genreMatch = Regex.Match(Page, @"<meta\sitemprop=""genre""\scontent=""(?<genre>[^""]*)"">");
             string genreStr = WebUtility.HtmlDecode(genreMatch.Groups["genre"].Value);
             _genre = YouTubeGenreHelper.StringToEnum(genreStr);
         }
         private void GetTags()
         {
-            var tagMatches = Regex.Matches(_page, @"<meta\sproperty=""og:video:tag""\scontent=""(?<tag>[^\s]*)"">");
+            var tagMatches = Regex.Matches(Page, @"<meta\sproperty=""og:video:tag""\scontent=""(?<tag>[^\s]*)"">");
             _tags = new string[tagMatches.Count];
             for (int i = 0; i < tagMatches.Count; i++)
                 _tags[i] = tagMatches[i].Groups["tag"].Value;

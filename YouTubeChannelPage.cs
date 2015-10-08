@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace YouTubeParse
 {
-    public class YouTubeChannel
+    public class YouTubeChannelPage : YouTubeHtmlPage
     {
-        private string _channelMainPage;
         //private string _channelAboutPage;
 
         public string ChannelId { get; private set; }
@@ -19,7 +18,7 @@ namespace YouTubeParse
         public int Views { get; private set; }
         public DateTime JoinedDate { get; private set; }
 
-        public YouTubeChannel(string channelUrl )
+        public YouTubeChannelPage(string channelUrl ) : base (channelUrl)
         {
             
             if (!ValidateChannelUrl(channelUrl))
@@ -28,12 +27,6 @@ namespace YouTubeParse
             GetChannelId(channelUrl);
 
             throw new NotImplementedException("This class is not ready for prime-time");
-        }
-
-        public async Task DownloadCommentsPage()
-        {
-            var downloader = new HttpDownloader(Uri.AbsoluteUri, String.Empty, String.Empty);
-            _channelMainPage = await downloader.GetPageAsync();
         }
 
         private void GetChannelId(string channelUrl)

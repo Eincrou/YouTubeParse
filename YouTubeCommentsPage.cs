@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace YouTubeParse
 {
-    public class YouTubeCommentsPage
+    public class YouTubeCommentsPage : YouTubeHtmlPage
     {
-        private string _page;
-        public YouTubeURL VideoUrl { get; set; }
+        public YouTubeUrl VideoUrl { get; set; }
 
         public int NumComments
         {
@@ -25,19 +24,18 @@ namespace YouTubeParse
         }
         private int? _numComments;
 
-        public YouTubeCommentsPage(YouTubeURL yturl)
+        public YouTubeCommentsPage(YouTubeUrl ytUrl) : base (ytUrl)
         {
-            VideoUrl = yturl;
+            VideoUrl = ytUrl;
         }
         public async Task DownloadYouTubeCommentsPageAsync()
         {
-            var downloader = new HttpDownloader(VideoUrl.AllCommentsUri.AbsoluteUri, String.Empty, String.Empty);
-            _page = await downloader.GetPageAsync();
+            await DownloadPageAsync();
         }
 
         public void GetNumComments()
         {
-            var numCommentsMatch = Regex.Match(_page, @"\<strong\>All\sComments\<\/strong\>\s\((?<comments>[^\)]*)");
+            var numCommentsMatch = Regex.Match(Page, @"\<strong\>All\sComments\<\/strong\>\s\((?<comments>[^\)]*)");
             _numComments = numCommentsMatch.Groups["comments"].Success ? int.Parse(numCommentsMatch.Groups["comments"].Value, NumberStyles.AllowThousands) : 0;
         }
     }

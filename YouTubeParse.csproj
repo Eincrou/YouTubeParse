@@ -43,16 +43,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HttpDownloader.cs" />
-    <Compile Include="YouTubeChannel.cs" />
+    <Compile Include="YouTubeChannelPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="YouTubeCommentsPage.cs" />
     <Compile Include="YouTubeGenre.cs" />
-    <Compile Include="YouTubePage.cs" />
-    <Compile Include="YouTubePlaylist.cs" />
+    <Compile Include="YouTubeHtmlPage.cs" />
+    <Compile Include="YouTubePlaylistPage.cs" />
     <Compile Include="YouTubeURL.cs" />
     <Compile Include="YouTubeURLAlternate.cs" />
     <Compile Include="YouTubeVideo.cs" />
     <Compile Include="YouTubeVideoGroup.cs" />
+    <Compile Include="YouTubeVideoPage.cs" />
+    <Compile Include="YouTubeVideoPrivacy.cs" />
     <Compile Include="YouTubeVideoThumbnail.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

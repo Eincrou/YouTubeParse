@@ -10,12 +10,10 @@ using System.Threading.Tasks;
 
 namespace YouTubeParse
 {
-    public class YouTubePlaylistPage
+    public class YouTubePlaylistPage : YouTubeHtmlPage
     {
         private readonly string _playlistId;
-        private string _playlistPage;
-        private readonly List<YouTubeURL> _pageUrls = new List<YouTubeURL>();
-        public bool IsPageDownloaded { get; private set; }
+
         /// <summary>
         /// URL to this playlist's main page
         /// </summary>
@@ -50,13 +48,13 @@ namespace YouTubeParse
         /// <summary>
         /// All of the videos in this playlist
         /// </summary>
-        public List<YouTubeURL> VideoUrlsList { get { return _pageUrls; } }
+        public List<YouTubeUrl> VideoUrlsList { get; } = new List<YouTubeUrl>();
 
         /// <summary>
         /// Instantiates a new YouTubePlaylist object, containing information about a playlist on YouTube.
         /// </summary>
         /// <param name="playlistUrl">String representing a valid YouTube playlist URL</param>
-        public YouTubePlaylistPage(string playlistUrl)
+        public YouTubePlaylistPage(string playlistUrl) : base (playlistUrl)
         {
             if (!ValidatePlaylistUrl(playlistUrl))
                 throw new ArgumentException("Invalid YouTube playlist URL", "playlistUrl");
@@ -65,13 +63,10 @@ namespace YouTubeParse
 
         public async Task DownloadPlaylistPageAsync()
         {
-            var downloader = new HttpDownloader(PlaylistUrl, String.Empty, String.Empty);
-            _playlistPage = await downloader.GetPageAsync();
-
+            await DownloadPageAsync();
             GetPlaylistInformation();
             GetAllYouTubeUrls();
             GetTotalDuration();
-            IsPageDownloaded = true;
         }
 
         /// <summary>
@@ -91,13 +86,13 @@ namespace YouTubeParse
             List<YouTubeVideo> videosList = new List<YouTubeVideo>();
             foreach (var video in VideoUrlsList)
             {
-                YouTubePage ytPage = new YouTubePage(video);
+                YouTubeVideoPage ytVideoPage = new YouTubeVideoPage(video);
                 YouTubeCommentsPage ytComPage = new YouTubeCommentsPage(video);
                 Task[] tasks = new Task[2];
-                tasks[0] = ytPage.DownloadYouTubePageAsync();
+                tasks[0] = ytVideoPage.DownloadYouTubePageAsync();
                 tasks[1] = ytComPage.DownloadYouTubeCommentsPageAsync();
                 await Task.WhenAll(tasks);
-                YouTubeVideo ytv = new YouTubeVideo(video, ytPage, ytComPage);
+                YouTubeVideo ytv = new YouTubeVideo(video, ytVideoPage, ytComPage);
                 videosList.Add(ytv);
             }
             return new YouTubeVideoGroup(videosList);
@@ -106,7 +101,7 @@ namespace YouTubeParse
         private void GetTotalDuration()
         {
             Duration = TimeSpan.Zero;
-            var tsMatches = Regex.Matches(_playlistPage,
+            var tsMatches = Regex.Matches(Page,
                 @"<div\sclass=""timestamp"">[^>]*>(?<TS>[^<]*)");
             foreach (Match match in tsMatches)
             {
@@ -128,7 +123,7 @@ namespace YouTubeParse
         private void GetPlaylistInformation()
         {
             GetTitle();
-            var detailsMatch = Regex.Match(_playlistPage,
+            var detailsMatch = Regex.Match(Page,
                 @"<ul\sclass=""pl-header-details""><li>by\s<a\shref=[^>]*>(?<owner>[^<]*)</a></li><li>(?<numvideos>\S*)[^<]*<\/li><li>(?<views>\S*)[^<]*<\/li><li>(Last\supdated\son\s(?<updated>[^<]*)|Updated\s(?<updated>[^<]*))");
             Owner = WebUtility.HtmlDecode(detailsMatch.Groups["owner"].Value);
             int numVideosValue, viewsValue;
@@ -144,21 +139,21 @@ namespace YouTubeParse
         }
         private void GetTitle()
         {
-            var titleMatch = Regex.Match(_playlistPage, @"<h1\sclass=""pl-header-title"">\s*(?<title>[^\r\n]*)");
+            var titleMatch = Regex.Match(Page, @"<h1\sclass=""pl-header-title"">\s*(?<title>[^\r\n]*)");
             string title = titleMatch.Groups["title"].Value;
             Title = WebUtility.HtmlDecode(title);
         }
 
         private void GetAllYouTubeUrls()
         {
-            var urlMatches = Regex.Matches(_playlistPage,
+            var urlMatches = Regex.Matches(Page,
                 @"<td\sclass=""pl-video-title"">\s*<a\s([\w-]*=""[^""]*""\s?)*");
             // TODO This hardcoding should be improved.
             foreach (Match match in urlMatches) 
             {
                 string href = match.Groups[1].Captures[2].Value;
                 string vidId = href.Substring(15, 11);
-                _pageUrls.Add(new YouTubeURL(@"https://www.youtube.com/watch?v=" + vidId));
+                VideoUrlsList.Add(new YouTubeUrl(@"https://www.youtube.com/watch?v=" + vidId));
             }
         }
 

@@ -12,7 +12,7 @@ namespace YouTubeParse
         /// <summary>
         /// Instance of a YouTube video URL for this instance of a YouTubeVideoThumbnail
         /// </summary>
-        public YouTubeURL VideoUrl { get; private set; }
+        public YouTubeUrl VideoUrl { get; private set; }
         /// <summary>
         /// URI for full resolution thumbnail image
         /// </summary>
@@ -36,7 +36,7 @@ namespace YouTubeParse
         /// <param name="youtubeuUrl">A validated YouTube URL. (Use YouTubeURL.ValidateYTURL)</param>
         public YouTubeVideoThumbnail(string youtubeuUrl)
         {
-            VideoUrl = new YouTubeURL(youtubeuUrl);
+            VideoUrl = new YouTubeUrl(youtubeuUrl);
             CreateURLs();
             GetThumbnail();
         }

@@ -8,8 +8,8 @@ namespace YouTubeParse
 {
     public class YouTubeVideo
     {
-        public YouTubeURL Url { get; set; }
-        public YouTubePage Page { get; set; }
+        public YouTubeUrl Url { get; set; }
+        public YouTubeVideoPage VideoPage { get; set; }
         public YouTubeCommentsPage CommentsPage { get; set; }
         //public YouTubeVideoThumbnail Thumbnail { get; set; }
 
@@ -20,16 +20,16 @@ namespace YouTubeParse
         //    CommentsPage = new YouTubeCommentsPage(ytUrl);
         //    DownloadPages();
         //}
-        public YouTubeVideo(YouTubeURL ytUrl, YouTubePage ytPage, YouTubeCommentsPage ytComPage)
+        public YouTubeVideo(YouTubeUrl ytUrl, YouTubeVideoPage ytVideoPage, YouTubeCommentsPage ytComPage)
         {
             Url = ytUrl;
-            Page = ytPage;
+            VideoPage = ytVideoPage;
             CommentsPage = ytComPage;
         }
-        public YouTubeVideo(YouTubePage ytPage, YouTubeCommentsPage ytComPage)
+        public YouTubeVideo(YouTubeVideoPage ytVideoPage, YouTubeCommentsPage ytComPage)
         {
-            Url = ytPage.VideoUrl;
-            Page = ytPage;
+            Url = ytVideoPage.VideoUrl;
+            VideoPage = ytVideoPage;
             CommentsPage = ytComPage;
         }
 
