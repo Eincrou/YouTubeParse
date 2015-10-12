@@ -23,12 +23,12 @@ namespace YouTubeParse
         /// <summary>
         /// List of all YouTubeVideos
         /// </summary>
-        public IEnumerable<YouTubeVideo> VideoGroupList
+        public List<YouTubeVideo> VideoGroupList
         {
             get { return _videoGroupList; }
             private set { _videoGroupList = value; }
         }
-        private IEnumerable<YouTubeVideo> _videoGroupList;
+        private List<YouTubeVideo> _videoGroupList;
 
         public int Count => VideoGroupList.Count();
 
@@ -107,29 +107,45 @@ namespace YouTubeParse
         #region Private Fields
         private List<YouTubeVideo> _videosNotReady;
         #endregion
-
-        public YouTubeVideoGroup(IEnumerable<YouTubeVideo> videosList)
+        /// <summary>
+        /// Instantiates a new group of YouTubeVideos. Provides aggregated information about the set of videos.
+        /// </summary>
+        /// <param name="videos">A collection of YouTubeVideos</param>
+        public YouTubeVideoGroup(IEnumerable<YouTubeVideo> videos)
         {
-            VideoGroupList = videosList;
-            CheckForVideosNotReady();
+            VideoGroupList = videos.ToList();
+            CheckVideosReady();
         }
-        
-        #region Public Methods
-        public async Task DownloadPagesForVideosNotReady()
+        /// <summary>
+        /// Instantiates a new group of YouTubeVideos. Provides aggregated information about the set of videos.
+        /// </summary>
+        /// <param name="videoUrls">A collection of YouTubeUrls</param>
+        public YouTubeVideoGroup(IEnumerable<YouTubeUrl> videoUrls)
         {
-            foreach (var video in _videosNotReady)
+            VideoGroupList = videoUrls.Select(url => new YouTubeVideo(url)).ToList();
+            CheckVideosReady();
+        }
+        #region Public Methods
+        public async Task DownloadPagesForVideosNotReadyAsync()
+        {
+            if (_videosNotReady?.Count > 0)
             {
-                try
+
+                foreach (var video in _videosNotReady)
                 {
-                    await video.DownloadPages();
-                    OnVideoReady(new VideoGroupEventArgs(video));
+                    try
+                    {
+                        await video.DownloadPages();
+                        VideoGroupList.Add(video);
+                        OnVideoReady(new VideoGroupEventArgs(video));
+                    }
+                    catch (Exception e)
+                    {
+                        throw;
+                    }
                 }
-                catch (Exception e)
-                {
-                    throw;
-                }
+                CheckVideosReady();
             }
-            CheckForVideosNotReady();
         }
         /// <summary>
         /// Adds a video to the group
@@ -138,11 +154,9 @@ namespace YouTubeParse
         /// <returns>Whether the video was successfully added. Returns false if the video is already in the group.</returns>
         public bool AddVideo(YouTubeVideo video)
         {
-            var vgl = VideoGroupList.ToList();
-            if (!vgl.Contains(video)) return false;
-            vgl.Add(video);
-            VideoGroupList = vgl;
-            CheckForVideosNotReady();
+            if (!VideoGroupList.Contains(video)) return false;
+            VideoGroupList.Add(video);
+            CheckVideosReady();
             return true;
         }
         /// <summary>
@@ -152,16 +166,14 @@ namespace YouTubeParse
         /// <returns>Whether the videos were successfully added. Returns false if all videos are already in the group</returns>
         public bool AddVideos(IEnumerable<YouTubeVideo> videos)
         {
-            var vgl = VideoGroupList.ToList();
             bool videoAdded = false;
             foreach (var video in videos)
             {
-                if (vgl.Contains(video)) continue;
-                vgl.Add(video);
+                if (VideoGroupList.Contains(video)) continue;
+                VideoGroupList.Add(video);
                 videoAdded = true;
             }
-            VideoGroupList = vgl;
-            CheckForVideosNotReady();
+            CheckVideosReady();
             return videoAdded;
         }
         /// <summary>
@@ -171,10 +183,8 @@ namespace YouTubeParse
         /// <returns>Whether the group was successfully removed from the group</returns>
         public bool RemoveVideo(YouTubeVideo video)
         {
-            var vgl = VideoGroupList.ToList();
-            if (!vgl.Contains(video)) return false;
-            vgl.Remove(video);
-            VideoGroupList = vgl;
+            if (!VideoGroupList.Contains(video)) return false;
+            VideoGroupList.Remove(video);
             return true;
         }
         /// <summary>
@@ -184,26 +194,25 @@ namespace YouTubeParse
         /// <returns>Whether the videos were successfully removed.</returns>
         public bool RemoveVideos(IEnumerable<YouTubeVideo> videos)
         {
-            var vgl = VideoGroupList.ToList();
             bool videosRemoved = false;
             foreach (var video in videos)
             {
-                if (!vgl.Contains(video)) continue;
-                vgl.Remove(video);
+                if (!VideoGroupList.Contains(video)) continue;
+                VideoGroupList.Remove(video);
                 videosRemoved = true;
             }
-            VideoGroupList = vgl;
             return videosRemoved;
         }
         #endregion
 
         #region Private Methods
-        private void CheckForVideosNotReady()
+        private void CheckVideosReady()
         {
             var videosNeedingDownload = from video in VideoGroupList
-                                        where video.IsVideoReady
+                                        where !video.IsVideoReady
                                         select video;
             _videosNotReady = videosNeedingDownload.ToList();
+            VideoGroupList.RemoveAll(video => _videosNotReady.Contains(video));
         }
 
         #endregion

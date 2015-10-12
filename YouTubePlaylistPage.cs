@@ -80,23 +80,6 @@ namespace YouTubeParse
                 return true;
             return false;
         }
-
-        public async Task<YouTubeVideoGroup> GetYouTubeVideoGroupAsync()
-        {
-            List<YouTubeVideo> videosList = new List<YouTubeVideo>();
-            foreach (var video in VideoUrlsList)
-            {
-                YouTubeVideoPage ytVideoPage = new YouTubeVideoPage(video);
-                YouTubeCommentsPage ytComPage = new YouTubeCommentsPage(video);
-                Task[] tasks = new Task[2];
-                tasks[0] = ytVideoPage.DownloadPageAsync();
-                tasks[1] = ytComPage.DownloadPageAsync();
-                await Task.WhenAll(tasks);
-                YouTubeVideo ytv = new YouTubeVideo(video, ytVideoPage, ytComPage);
-                videosList.Add(ytv);
-            }
-            return new YouTubeVideoGroup(videosList);
-        }
         private string GetPlaylistId(string playlistUrl)
         {
             var plIdMatch = Regex.Match(playlistUrl, @"list=(?<list>[^&]*)");
