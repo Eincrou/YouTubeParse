@@ -223,7 +223,7 @@ namespace YouTubeParse
         /// Instantiates a new YouTubePage instance that can parse information about YouTube videos from their HTML pages
         /// </summary>
         /// <param name="ytUrl">A YouTubeURL object</param>
-        public YouTubeVideoPage(YouTubeUrl ytUrl) : base (ytUrl)
+        public YouTubeVideoPage(YouTubeUrl ytUrl) : base (ytUrl.LongYTURL.AbsoluteUri)
         {
             VideoUrl = ytUrl;
         }
@@ -232,7 +232,20 @@ namespace YouTubeParse
         /// </summary>
         public override async Task DownloadPageAsync()
         {
-            await base.DownloadPageAsync();
+            try
+            {
+                await base.DownloadPageAsync();
+                if (VideoPrivacy == YouTubeVideoPrivacy.Private)
+                    throw new UnauthorizedAccessException($"Video {VideoUrl.VideoID} is private and inaccessible.");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
         /// <summary>
         /// Populates all fields with information. (Ordinarily, information is only parsed when accessed.)

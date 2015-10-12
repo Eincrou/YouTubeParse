@@ -12,21 +12,13 @@ namespace YouTubeParse
         public bool IsPageDownloaded { get; protected set; }
         public Uri PageUri { get; }
         /// <summary>
-        /// Downloads a YouTubeVideoPage
-        /// </summary>
-        /// <param name="ytUrl"></param>
-        public YouTubeHtmlPage(YouTubeUrl ytUrl)
-        {
-            PageUri = ytUrl.LongYTURL;
-        }
-        /// <summary>
-        /// Downloads a YouTubeCommentsPage, YouTubePlaylistPage or YouTUbeChannelPage
+        /// Downloads a YouTubeVideoPage, YouTubeCommentsPage, YouTubePlaylistPage or YouTubeChannelPage
         /// </summary>
         /// <param name="url"></param>
         public YouTubeHtmlPage(string url)
         {
             if (YouTubePlaylistPage.ValidatePlaylistUrl(url) || YouTubeCommentsPage.ValidateYouTubeCommentsPageUrl(url)
-                || YouTubeChannelPage.ValidateChannelUrl(url))
+                || YouTubeChannelPage.ValidateChannelUrl(url) || YouTubeUrl.ValidateUrl(url))
             {
                 PageUri = new Uri(url);
             }
