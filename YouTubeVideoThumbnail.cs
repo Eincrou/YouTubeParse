@@ -74,10 +74,9 @@ namespace YouTubeParse
         public event EventHandler GetThumbnailSuccess;
         private void OnThumbnailSuccess(object sender, EventArgs e)
         {
-            UsingMaxResImage = true;
-            EventHandler getThumbnailSuccess = GetThumbnailSuccess;
-            if (getThumbnailSuccess != null)
-                GetThumbnailSuccess(sender, e);
+            UsingMaxResImage = _thumbnailImage.UriSource.AbsoluteUri == ImageMaxResUri.AbsoluteUri;
+            if (GetThumbnailSuccess != null) GetThumbnailSuccess(sender, e);
+            _thumbnailImage.DownloadFailed -= OnThumbnailFailure;
         }
         /// <summary>
         /// Occurs when the YouTube thumbnail image has failed to download.

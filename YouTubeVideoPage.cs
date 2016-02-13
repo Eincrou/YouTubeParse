@@ -1,11 +1,10 @@
-using System;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
-
 namespace YouTubeParse
 {
+    using System;
+    using System.Net;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
+    using System.Windows.Media.Imaging;
     public class YouTubeVideoPage : YouTubeHtmlPage
     {
         #region Public Properties

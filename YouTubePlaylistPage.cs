@@ -17,9 +17,9 @@ namespace YouTubeParse
         /// <summary>
         /// URL to this playlist's main page
         /// </summary>
-        public string PlaylistUrl
+        public Uri PlaylistUrl
         {
-            get { return @"https://www.youtube.com/playlist?list=" + _playlistId; } 
+            get { return new Uri(@"https://www.youtube.com/playlist?list=" + _playlistId); } 
         }
         /// <summary>
         /// Title of this playlist
@@ -60,10 +60,15 @@ namespace YouTubeParse
                 throw new ArgumentException("Invalid YouTube playlist URL", "playlistUrl");
             _playlistId = GetPlaylistId(playlistUrl);
         }
-
+        /// <summary>
+        /// Downloads and parses information about this playlist.  Throws exception if playlist is private.
+        /// </summary>
+        /// <returns></returns>
         public override async Task DownloadPageAsync()
         {
-            await base.DownloadPageAsync();
+            await base.DownloadPageAsync(PlaylistUrl);
+            if (await CheckIfPlaylistPrivate())
+                throw new AccessViolationException("This playlist is private.");
             GetPlaylistInformation();
             GetAllYouTubeUrls();
             GetTotalDuration();
@@ -103,6 +108,7 @@ namespace YouTubeParse
                 Duration += TimeSpan.Parse(matchDuration);
             }
         }
+        //TODO Correctly parse: Last updated "3 days ago" / "Yesterday"
         private async void GetPlaylistInformation()
         {
             if (!IsPageDownloaded) await DownloadPageAsync();
@@ -124,7 +130,7 @@ namespace YouTubeParse
         private async void GetTitle()
         {
             if (!IsPageDownloaded) await DownloadPageAsync();
-            var titleMatch = Regex.Match(Page, @"<h1\sclass=""pl-header-title"">\s*(?<title>[^\r\n]*)");
+            var titleMatch = Regex.Match(Page, @"<h1\sclass=""pl-header-title""[^>]*>\s*(?<title>[^\r\n]*)");
             string title = titleMatch.Groups["title"].Value;
             Title = WebUtility.HtmlDecode(title);
         }
@@ -140,6 +146,13 @@ namespace YouTubeParse
                 string vidId = href.Substring(15, 11);
                 VideoUrlsList.Add(new YouTubeUrl(@"https://www.youtube.com/watch?v=" + vidId));
             }
+        }
+
+        private async Task<bool> CheckIfPlaylistPrivate()
+        {
+            if (!IsPageDownloaded) await DownloadPageAsync();
+            var privateMatch = Regex.Match(Page, @"This playlist is private");
+            return privateMatch.Success;
         }
     }
 }

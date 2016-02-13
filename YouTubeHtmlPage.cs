@@ -31,5 +31,11 @@ namespace YouTubeParse
             Page = await downloader.GetPageAsync();
             IsPageDownloaded = true;
         }
+        public virtual async Task DownloadPageAsync(Uri uri)
+        {
+            var downloader = new HttpDownloader(uri.AbsoluteUri, String.Empty, String.Empty);
+            Page = await downloader.GetPageAsync();
+            IsPageDownloaded = true;
+        }
     }
 }

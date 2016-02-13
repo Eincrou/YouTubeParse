@@ -8,11 +8,13 @@ namespace YouTubeParse
 {
     public class VideoGroupEventArgs
     {
-        public VideoGroupEventArgs(YouTubeVideo video)
+        public VideoGroupEventArgs(YouTubeVideo video, int progress)
         {
             Video = video;
+            Progress = progress;
         }
-        public YouTubeVideo Video { get; private set; } 
+        public YouTubeVideo Video { get; }
+        public int Progress { get; }
     }
     public class YouTubeVideoGroup
     {
@@ -130,14 +132,20 @@ namespace YouTubeParse
         {
             if (_videosNotReady?.Count > 0)
             {
-
+                double progress = 0;
                 foreach (var video in _videosNotReady)
                 {
                     try
                     {
+                        progress++;
                         await video.DownloadPages();
                         VideoGroupList.Add(video);
-                        OnVideoReady(new VideoGroupEventArgs(video));
+                        int progressAmount = Convert.ToInt32(((progress / _videosNotReady.Count) * 100));
+                        OnVideoReady(new VideoGroupEventArgs(video, progressAmount));
+                    }
+                    catch(AccessViolationException ave)
+                    {
+                        throw;
                     }
                     catch (Exception e)
                     {
