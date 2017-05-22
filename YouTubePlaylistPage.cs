@@ -114,18 +114,37 @@ namespace YouTubeParse
             if (!IsPageDownloaded) await DownloadPageAsync();
             GetTitle();
             var detailsMatch = Regex.Match(Page,
-                @"<ul\sclass=""pl-header-details""><li>by\s<a\shref=[^>]*>(?<owner>[^<]*)</a></li><li>(?<numvideos>\S*)[^<]*<\/li><li>(?<views>\S*)[^<]*<\/li><li>(Last\supdated\son\s(?<updated>[^<]*)|Updated\s(?<updated>[^<]*))");
+                @"<ul\sclass=""pl-header-details"">[^""]*""(?<ownerurl>[^""]*)""[^>]*>(?<owner>[^<]*)</a></li><li>(?<numvideos>\d*)[^<]*</li><li>(?<views>[^\s]*)[^<]*</li><li>(?<updated>[^<]*)</li></ul>");
+                //@"<ul\sclass=""pl-header-details"">[^""]*""(?<ownerurl>[^""]*)""(.*"")*>(?<owner>\w*)</a></li><li>(?<numvideos>\d*)[^0-9]*(?<views>[\S]*)[^<]</li><li>Last\supdated\son\s(?<updated>[^<]*)</li></ul>");
             Owner = WebUtility.HtmlDecode(detailsMatch.Groups["owner"].Value);
             int numVideosValue, viewsValue;
 
             int.TryParse(detailsMatch.Groups["numvideos"].Value, out numVideosValue);
-            int.TryParse(detailsMatch.Groups["views"].Value, NumberStyles.AllowThousands, null, out viewsValue);
+            if (!int.TryParse(detailsMatch.Groups["views"].Value, NumberStyles.AllowThousands, null, out viewsValue))
+                viewsValue = 0;
             NumVideos = numVideosValue;
             Views = viewsValue;
-            DateTime dateUpdatedValue;
-            if (!DateTime.TryParse(detailsMatch.Groups["updated"].Value, out dateUpdatedValue))
-                dateUpdatedValue = DateTime.Today;
-            LastUpdated = dateUpdatedValue;
+            //DateTime dateUpdatedValue;
+            //if (!DateTime.TryParse(detailsMatch.Groups["updated"].Value, out dateUpdatedValue))
+            //    dateUpdatedValue = DateTime.Today;
+            LastUpdated = ParseDateUpdated(detailsMatch.Groups["updated"].Value);
+        }
+
+        private DateTime ParseDateUpdated(string dateString)
+        {
+            if (dateString.Contains("Last updated on"))
+                return DateTime.Parse(dateString.Replace("Last updated on ", string.Empty));
+            else if (dateString.Contains("Updated"))
+            {
+                string daysAgo = dateString.Remove(0, 8).Replace(" days ago", string.Empty);
+                return DateTime.Today.Subtract(TimeSpan.FromDays(int.Parse(daysAgo)));
+            }
+            else if (dateString.Contains("Yesterday"))
+                return DateTime.Today.Subtract(TimeSpan.FromDays(1));
+            else if (dateString.Contains("Today"))
+                return DateTime.Today;
+            else
+                throw new ArgumentException("Date could not be parsed");
         }
         private async void GetTitle()
         {

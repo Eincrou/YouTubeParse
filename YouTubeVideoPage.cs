@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace YouTubeParse
 {
     using System;
@@ -175,6 +177,20 @@ namespace YouTubeParse
             }
         }
         private int? _viewCount;
+        /// <summary>
+        /// Gets the number of comments on this video
+        /// </summary>
+        public int CommentsCount
+        {
+            get
+            {
+                if (!_commentsCount.HasValue)
+                    GetCommentsCount();
+                if (_commentsCount != null) return _commentsCount.Value;
+                throw new Exception("Could not determine comments count");
+            }
+        }
+        private int? _commentsCount;
         /// <summary>
         /// Gets the date the video was uploaded or published
         /// </summary>
@@ -365,6 +381,14 @@ namespace YouTubeParse
             //    views = "LIVE NOW";
             //_viewCount = views;
             _viewCount = int.Parse(viewCountMatch.Groups["views"].Value);
+        }
+
+        private async void GetCommentsCount()
+        {
+            //if (!IsPageDownloaded) await DownloadPageAsync();
+            //var commentsCountMatch = Regex.Match(Page, @"<b>\w*</b>\s.\s(?<comments>[0-9,.]*)<");
+            //_commentsCount = int.Parse(commentsCountMatch.Groups["comments"].Value, NumberStyles.AllowThousands);
+            _commentsCount = 0;
         }
         private async void GetPublished()
         {

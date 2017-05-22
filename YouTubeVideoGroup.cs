@@ -76,14 +76,14 @@ namespace YouTubeParse
         /// </summary>
         public double CommentsAvg
         {
-            get { return VideoGroupList.Average(video => video.CommentsPage.NumComments); }
+            get { return VideoGroupList.Average(video => video.VideoPage.CommentsCount); }
         }
         /// <summary>
         /// Total number of comments for all videos in this group.
         /// </summary>
         public int CommentsTotal
         {
-            get { return VideoGroupList.Sum(video => video.CommentsPage.NumComments); }
+            get { return VideoGroupList.Sum(video => video.VideoPage.CommentsCount); }
         }
         /// <summary>
         /// Average duration of all videos in this group.

@@ -18,7 +18,7 @@ namespace YouTubeParse
     {
         public YouTubeUrl Url { get; set; }
         public YouTubeVideoPage VideoPage { get; set; }
-        public YouTubeCommentsPage CommentsPage { get; set; }
+        public YouTubeCommentsPage CommentsPage { get; set; }   // Comments pages no longer exist.
         //public YouTubeVideoThumbnail Thumbnail { get; set; }
         public bool IsVideoReady => VideoPage.IsPageDownloaded && CommentsPage.IsPageDownloaded;
 
