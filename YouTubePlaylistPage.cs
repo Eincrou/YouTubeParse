@@ -132,17 +132,20 @@ namespace YouTubeParse
 
         private DateTime ParseDateUpdated(string dateString)
         {
-            if (dateString.Contains("Last updated on"))
-                return DateTime.Parse(dateString.Replace("Last updated on ", string.Empty));
-            else if (dateString.Contains("Updated"))
+            dateString = dateString.ToLower();
+            if (dateString.Contains("last updated on"))
+                return DateTime.Parse(dateString.Replace("last updated on ", string.Empty));
+            if (dateString.Contains("today"))
+                return DateTime.Today;
+            if (dateString.Contains("yesterday"))
+                return DateTime.Today.Subtract(TimeSpan.FromDays(1));
+            if (dateString.Contains("days ago"))
             {
                 string daysAgo = dateString.Remove(0, 8).Replace(" days ago", string.Empty);
                 return DateTime.Today.Subtract(TimeSpan.FromDays(int.Parse(daysAgo)));
             }
-            else if (dateString.Contains("Yesterday"))
-                return DateTime.Today.Subtract(TimeSpan.FromDays(1));
-            else if (dateString.Contains("Today"))
-                return DateTime.Today;
+
+
             else
                 throw new ArgumentException("Date could not be parsed");
         }
