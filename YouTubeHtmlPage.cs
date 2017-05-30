@@ -18,7 +18,8 @@ namespace YouTubeParse
         public YouTubeHtmlPage(string url)
         {
             if (YouTubePlaylistPage.ValidatePlaylistUrl(url) || YouTubeCommentsPage.ValidateYouTubeCommentsPageUrl(url)
-                || YouTubeChannelPage.ValidateChannelUrl(url) || YouTubeUrl.ValidateUrl(url))
+                || YouTubeChannelPage.ValidateChannelUrl(url) || YouTubeUrl.ValidateUrl(url) 
+                || YouTubeGetInfoPage.ValidateYouTubeGetInfoUrl(url))
             {
                 PageUri = new Uri(url);
             }

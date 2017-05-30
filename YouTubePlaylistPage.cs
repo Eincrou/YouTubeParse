@@ -81,9 +81,7 @@ namespace YouTubeParse
         /// <returns>Whether the input string is a URL with a valid YouTube playlist</returns>
         public static bool ValidatePlaylistUrl(string url)
         {
-            if ((url.Contains("youtube.com") || url.Contains("youtu.be")) && url.Contains("list="))
-                return true;
-            return false;
+            return (url.Contains("youtube.com") || url.Contains("youtu.be")) && url.Contains("list=");
         }
         private string GetPlaylistId(string playlistUrl)
         {
@@ -124,9 +122,6 @@ namespace YouTubeParse
                 viewsValue = 0;
             NumVideos = numVideosValue;
             Views = viewsValue;
-            //DateTime dateUpdatedValue;
-            //if (!DateTime.TryParse(detailsMatch.Groups["updated"].Value, out dateUpdatedValue))
-            //    dateUpdatedValue = DateTime.Today;
             LastUpdated = ParseDateUpdated(detailsMatch.Groups["updated"].Value);
         }
 

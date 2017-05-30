@@ -42,7 +42,7 @@ namespace YouTubeParse
         /// A URL to the video info page
         /// </summary>
         public Uri VideoInfoUri { get { return new Uri(@"http://www.youtube.com/get_video_info?video_id="+_videoId, UriKind.Absolute); } }
-
+        
         /// <summary>
         /// Initializes an instance of the YouTubeURL class.
         /// </summary>

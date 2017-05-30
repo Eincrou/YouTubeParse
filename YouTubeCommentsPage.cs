@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace YouTubeParse
 {
+    [Obsolete("YouTube comments pages no longer exist")]
     public class YouTubeCommentsPage : YouTubeHtmlPage
     {
         public YouTubeUrl VideoUrl { get; set; }
@@ -43,10 +44,9 @@ namespace YouTubeParse
         }
 
         public static bool ValidateYouTubeCommentsPageUrl(string url)
-        {       // https://www.youtube.com/all_comments?v=xxxxxxxxxxx
-            if ((url.Contains(@"youtube.com") && url.Contains(@"all_comments")) && url.Contains(@"v="))
-                return true;
-            return false;
+        {
+            // https://www.youtube.com/all_comments?v=xxxxxxxxxxx
+            return url.Contains(@"youtube.com") && url.Contains(@"all_comments") && url.Contains(@"v=");
         }
         private async void GetNumComments()
         {
